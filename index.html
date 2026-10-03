@@ -1,0 +1,495 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>
+<meta name="color-scheme" content="dark light"/>
+<link rel="icon" href="data:,"/>
+<title>Keep a Secret — Trust? Or Tell?</title>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Nunito:wght@700;800;900&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#080822; --bg2:#101034; --panel:#15153a; --panel2:#1d1d4d;
+  --text:#ffffff; --muted:#c7c7f0; --line:rgba(255,255,255,.14);
+  --pink:#ff2e9e; --pink2:#ff5ab8; --cyan:#00d4ff; --yellow:#ffd800; --green:#22c55e; --red:#ff3355;
+  --purple:#8b5cf6; --gold:#ffb800;
+  --radius:22px;
+  color-scheme:dark;
+}
+@media (prefers-color-scheme: light){
+  :root{ --bg:#fff7fb; --bg2:#ffeef8; --panel:#ffffff; --panel2:#fff0f8; --text:#171733; --muted:#5a5a7a; --line:rgba(0,0,0,.1); color-scheme:light; }
+}
+*{box-sizing:border-box}
+body{margin:0;font-family:"Nunito",system-ui,sans-serif;background:radial-gradient(900px 600px at 15% -5%, #2a1065 0, transparent 60%),radial-gradient(800px 500px at 95% 0%, #7a0a4a 0, transparent 55%), var(--bg);color:var(--text);min-height:100vh}
+a{color:var(--cyan)}
+button{font-family:inherit;cursor:pointer;border:0}
+.app{max-width:1120px;margin:0 auto;padding:14px 14px 28px}
+/* HUD */
+.hud{display:flex;align-items:center;justify-content:space-between;gap:12px;position:sticky;top:10px;z-index:20;background:rgba(10,10,40,.72);backdrop-filter:blur(12px);border:1px solid var(--line);border-radius:999px;padding:8px 10px 8px 14px}
+@media(prefers-color-scheme:light){.hud{background:rgba(255,255,255,.85)}}
+.brand{display:flex;align-items:center;gap:10px;font-family:"Fredoka";font-weight:700;letter-spacing:.2px}
+.lock{width:34px;height:34px;border-radius:10px;background:var(--yellow);display:grid;place-items:center;font-size:18px;box-shadow:0 4px 0 #d9a400}
+.brand b{font-size:18px;line-height:1}
+.brand small{display:block;font-family:"Nunito";font-weight:800;font-size:11px;color:var(--muted);letter-spacing:.12em;text-transform:uppercase}
+.hud-right{display:flex;gap:8px;align-items:center;flex-wrap:wrap;justify-content:flex-end}
+.pill{display:inline-flex;align-items:center;gap:7px;background:#fff;color:#111827;border-radius:999px;padding:7px 12px;font-weight:900;font-size:14px;border:2px solid #11182710;box-shadow:0 3px 0 rgba(0,0,0,.2)}
+.pill.dark{background:#1e1e4e;color:#fff;border-color:rgba(255,255,255,.2)}
+.coin{width:22px;height:22px;border-radius:50%;background:radial-gradient(circle at 35% 30%, #fff6a0, var(--gold) 55%, #e69500);display:grid;place-items:center;font-size:12px;color:#7a4a00;border:2px solid #fff3}
+.icon-btn{width:38px;height:38px;border-radius:50%;background:#22225c;color:#fff;display:grid;place-items:center;font-size:18px;border:1px solid var(--line)}
+/* Screens */
+.screen{display:none;animation:pop .28s ease}
+.screen.active{display:block}
+@keyframes pop{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+/* Hero */
+.hero{margin-top:14px;background:linear-gradient(180deg,#1a1040,#12082e);border:2px solid rgba(255,255,255,.14);border-radius:28px;overflow:hidden;position:relative}
+@media(prefers-color-scheme:light){.hero{background:linear-gradient(180deg,#fff,#ffeef8);color:#171733}}
+.hero-inner{display:grid;grid-template-columns:1.1fr .9fr;gap:0}
+@media(max-width:760px){.hero-inner{grid-template-columns:1fr}}
+.hero-copy{padding:22px 20px 18px}
+.kicker{display:inline-flex;gap:8px;flex-wrap:wrap;margin-bottom:10px}
+.tag{font-size:11px;letter-spacing:.14em;text-transform:uppercase;font-weight:900;padding:6px 9px;border-radius:999px;background:#fff;color:#111}
+.tag.pink{background:var(--pink);color:#fff}.tag.green{background:#a7f3d0;color:#065f46}.tag.yellow{background:var(--yellow);color:#5a3a00}
+.title{font-family:"Fredoka";font-weight:700;line-height:.9;font-size:clamp(48px,8vw,84px);letter-spacing:-.02em;margin:4px 0 6px;text-shadow:0 4px 0 rgba(0,0,0,.18)}
+.title span{display:inline-block}
+.c-p{color:#ff2e9e}.c-c{color:#00d4ff}.c-y{color:#ffd800}.c-g{color:#4ade80}.c-w{color:#fff}
+@media(prefers-color-scheme:light){.c-w{color:#171733}}
+.subtitle{font-family:"Fredoka";font-size:20px;font-weight:600;margin:6px 0}
+.subtitle em{font-style:normal;color:var(--yellow);background:#111827;padding:2px 8px;border-radius:999px;font-size:14px;vertical-align:middle;margin-left:6px}
+.lede{color:var(--muted);font-weight:700;line-height:1.5;font-size:15px;max-width:52ch}
+.join-box{margin-top:16px;background:rgba(255,255,255,.08);border:1px solid var(--line);border-radius:18px;padding:12px}
+@media(prefers-color-scheme:light){.join-box{background:#fff;border-color:#ffd6ec}}
+.join-box label{font-size:12px;letter-spacing:.12em;text-transform:uppercase;font-weight:900;color:var(--muted)}
+.join-row{display:flex;gap:8px;margin-top:8px;flex-wrap:wrap}
+.join-row input{flex:1;min-width:180px;background:#0f0f2e;color:#fff;border:2px solid rgba(255,255,255,.18);border-radius:999px;padding:13px 16px;font-weight:800;font-size:16px;outline:none}
+@media(prefers-color-scheme:light){.join-row input{background:#fff;color:#111;border-color:#e5e7eb}}
+.btn{border-radius:999px;padding:13px 20px;font-weight:900;font-size:16px;display:inline-flex;align-items:center;gap:8px;justify-content:center;transition:.15s}
+.btn:active{transform:translateY(1px)}
+.btn-play{background:var(--pink);color:#fff;box-shadow:0 6px 0 #b9006c, 0 10px 20px rgba(255,46,158,.35);font-family:"Fredoka";font-size:20px;letter-spacing:.06em;padding:14px 28px}
+.btn-play:hover{background:var(--pink2)}
+.btn-green{background:#16a34a;color:#fff;box-shadow:0 5px 0 #166534}
+.btn-ghost{background:transparent;color:var(--text);border:2px solid var(--line)}
+.btn-yellow{background:var(--yellow);color:#231a00;box-shadow:0 5px 0 #c49000}
+.btn[disabled]{opacity:.5;cursor:not-allowed;transform:none}
+.how{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:14px}
+@media(max-width:640px){.how{grid-template-columns:1fr}}
+.how div{background:#121232;border:1px solid var(--line);border-radius:16px;padding:12px}
+@media(prefers-color-scheme:light){.how div{background:#fff}}
+.how b{font-family:"Fredoka"}
+.how p{margin:4px 0 0;color:var(--muted);font-size:13px;line-height:1.5;font-weight:700}
+.hero-art{position:relative;min-height:320px;background:radial-gradient(600px 300px at 50% 0%, #ff2e9e33, transparent 60%), linear-gradient(180deg,#1e0f4a,#0d0724);display:flex;align-items:flex-end;justify-content:center;padding:16px;overflow:hidden}
+@media(prefers-color-scheme:light){.hero-art{background:radial-gradient(600px 300px at 50% 0%, #ff2e9e22, transparent 60%), linear-gradient(180deg,#ffe4f3,#fff)}}
+.stickers{position:absolute;top:12px;right:12px;display:grid;gap:6px;transform:rotate(3deg)}
+.stickers span{font-family:"Fredoka";font-weight:700;font-size:12px;padding:7px 9px;border-radius:8px;box-shadow:0 4px 10px rgba(0,0,0,.25);text-align:center}
+.duo{display:grid;grid-template-columns:1fr 1fr;gap:12px;width:100%;max-width:420px}
+.person{background:#fff;border-radius:20px;padding:12px;text-align:center;color:#111827;border:3px solid #1118270f;box-shadow:0 10px 20px rgba(0,0,0,.25)}
+.person .face{font-size:54px;line-height:1}
+.person b{font-family:"Fredoka";display:block;margin-top:6px}
+.person p{margin:2px 0 0;font-size:12px;font-weight:800;color:#6b7280;line-height:1.4}
+.robot{background:#e0f7ff}
+.mini-note{position:absolute;left:12px;bottom:12px;background:#111827;color:#fff;border-radius:999px;padding:7px 10px;font-size:12px;font-weight:900}
+/* Section head */
+.head{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;margin:18px 2px 12px;flex-wrap:wrap}
+.head h2{font-family:"Fredoka";font-size:28px;margin:0;line-height:1}
+.head p{margin:4px 0 0;color:var(--muted);font-weight:700}
+.back{width:40px;height:40px;border-radius:12px;background:#23235f;color:#fff;display:grid;place-items:center;font-size:20px;border:1px solid var(--line)}
+/* Characters */
+.grid{display:grid;grid-template-columns:repeat(5,1fr);gap:10px}
+@media(max-width:900px){.grid{grid-template-columns:repeat(3,1fr)}}
+@media(max-width:560px){.grid{grid-template-columns:repeat(2,1fr)}}
+.card{background:var(--panel);border:2px solid var(--line);border-radius:20px;padding:12px;text-align:center;position:relative;overflow:hidden}
+.card::before{content:"";position:absolute;inset:0 0 auto 0;height:86px;background:var(--cardBg,#333);opacity:.95}
+.card .ava{position:relative;width:84px;height:84px;margin:8px auto 8px;border-radius:50%;display:grid;place-items:center;font-size:42px;background:#fff;border:4px solid #fff;box-shadow:0 8px 16px rgba(0,0,0,.25);z-index:1}
+.card h3{font-family:"Fredoka";margin:6px 0 4px;font-size:18px;position:relative}
+.card p{margin:0;color:var(--muted);font-size:13px;line-height:1.5;font-weight:700;min-height:58px}
+.card button{margin-top:10px;width:100%}
+.badge{position:absolute;top:10px;right:10px;z-index:2;background:#111827;color:#fff;font-size:11px;font-weight:900;padding:5px 7px;border-radius:999px}
+/* Secret reveal */
+.secret-wrap{display:grid;grid-template-columns:.9fr 1.1fr;gap:12px}
+@media(max-width:760px){.secret-wrap{grid-template-columns:1fr}}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:22px;padding:16px}
+.chat-bubble{background:#fff;color:#111827;border-radius:18px 18px 18px 6px;padding:14px;font-weight:800;line-height:1.6;position:relative}
+.chat-bubble:after{content:"♥";position:absolute;right:12px;top:10px;color:#ff8ac2}
+.vault{margin-top:12px;background:#0f0f2e;color:#fff;border:2px dashed #ffd80066;border-radius:16px;padding:14px}
+@media(prefers-color-scheme:light){.vault{background:#fffbeb;color:#78350f;border-color:#f59e0b}}
+.vault b{color:var(--yellow)}
+@media(prefers-color-scheme:light){.vault b{color:#92400e}}
+/* Chat game */
+.game-grid{display:grid;grid-template-columns:300px 1fr;gap:12px}
+@media(max-width:820px){.game-grid{grid-template-columns:1fr}}
+.meter{height:12px;background:#ffffff22;border-radius:999px;overflow:hidden}
+.meter i{display:block;height:100%;background:linear-gradient(90deg,#22c55e,#84cc16);border-radius:999px;transition:.3s}
+.chatbox{background:#0d0d2b;border:1px solid var(--line);border-radius:22px;display:flex;flex-direction:column;min-height:520px;overflow:hidden}
+@media(prefers-color-scheme:light){.chatbox{background:#fff}}
+.chat-head{display:flex;align-items:center;gap:10px;padding:12px 14px;background:#17173f;color:#fff;border-bottom:1px solid var(--line)}
+@media(prefers-color-scheme:light){.chat-head{background:#111827}}
+.messages{flex:1;overflow:auto;padding:14px;display:flex;flex-direction:column;gap:10px;background:radial-gradient(600px 200px at 20% 0%, #ff2e9e14, transparent 60%)}
+.msg{max-width:82%;padding:11px 13px;border-radius:16px;font-weight:800;line-height:1.55;font-size:15px}
+.msg.bot{background:#fff;color:#111827;border-bottom-left-radius:6px;align-self:flex-start;box-shadow:0 4px 12px rgba(0,0,0,.12)}
+.msg.me{background:var(--pink);color:#fff;border-bottom-right-radius:6px;align-self:flex-end}
+.msg.system{background:#fef3c7;color:#92400e;align-self:center;font-size:13px;text-align:center;max-width:95%}
+.composer{border-top:1px solid var(--line);padding:10px;background:#121232}
+@media(prefers-color-scheme:light){.composer{background:#fff}}
+.quick{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px}
+.chip{background:#fff;color:#111827;border:2px solid #e5e7eb;border-radius:999px;padding:8px 11px;font-weight:900;font-size:13px}
+.chip.safe{border-color:#22c55e}.chip.risky{border-color:#f59e0b}.chip:active{transform:scale(.98)}
+.input-row{display:flex;gap:8px}
+.input-row input{flex:1;background:#fff;color:#111;border:2px solid #e5e7eb;border-radius:999px;padding:12px 14px;font-weight:800;outline:none;min-width:0}
+.input-row button{border-radius:999px;padding:0 18px}
+/* Result */
+.result{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media(max-width:700px){.result{grid-template-columns:1fr}}
+.result-card{border-radius:24px;padding:18px;text-align:center;border:2px solid var(--line)}
+.result-card.win{background:radial-gradient(400px 200px at 50% 0%, #22c55e33, transparent), #052e16;color:#ecfdf5}
+.result-card.lose{background:radial-gradient(400px 200px at 50% 0%, #ff335533, transparent), #450a1a;color:#fff1f2}
+.result-card .bigface{font-size:64px}
+.coin-big{font-family:"Fredoka";font-size:34px;display:flex;align-items:center;justify-content:center;gap:8px;margin:8px 0}
+/* Shop */
+.shop-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+@media(max-width:900px){.shop-grid{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:480px){.shop-grid{grid-template-columns:1fr}}
+.shop-item{background:var(--panel);border:2px solid var(--line);border-radius:20px;padding:14px;text-align:center}
+.shop-item .ic{font-size:42px}
+.shop-item h4{font-family:"Fredoka";margin:6px 0 4px}
+.shop-item p{color:var(--muted);font-size:13px;font-weight:700;line-height:1.5;min-height:58px;margin:0}
+.price{margin-top:10px;width:100%}
+/* Footer note */
+.foot{margin-top:14px;color:var(--muted);font-size:13px;font-weight:700;text-align:center;line-height:1.6}
+.toast{position:fixed;left:50%;bottom:18px;transform:translateX(-50%) translateY(20px);background:#111827;color:#fff;padding:11px 14px;border-radius:999px;font-weight:900;opacity:0;pointer-events:none;transition:.2s;z-index:50;box-shadow:0 10px 20px rgba(0,0,0,.3);max-width:92vw;text-align:center}
+.toast.show{opacity:1;transform:translateX(-50%)}
+.hidden{display:none!important}
+</style>
+</head>
+<body>
+<div class="app">
+  <!-- HUD -->
+  <header class="hud">
+    <div class="brand"><div class="lock">🔒</div><div><b>Keep a Secret</b><small>Trust? Or Tell?</small></div></div>
+    <div class="hud-right">
+      <span class="pill dark" id="playerPill">👋 Guest</span>
+      <span class="pill"><span class="coin">★</span> <span id="coins">250</span></span>
+      <button class="icon-btn" id="shopBtn" title="Upgrade Shop">🛒</button>
+      <button class="icon-btn" id="homeBtn" title="Home">⌂</button>
+    </div>
+  </header>
+
+  <!-- HOME / JOIN -->
+  <section id="screen-home" class="screen active">
+    <div class="hero">
+      <div class="hero-inner">
+        <div class="hero-copy">
+          <div class="kicker"><span class="tag pink">Make Friends</span><span class="tag green">Keep Secrets</span><span class="tag yellow">Earn Coins</span></div>
+          <h1 class="title"><span class="c-w">Keep</span> <span class="c-y">a</span><br><span class="c-p">S</span><span class="c-c">e</span><span class="c-y">c</span><span class="c-g">r</span><span style="color:#ff8a00">e</span><span class="c-p">t</span> <span style="font-size:.55em;vertical-align:top">🔒</span></h1>
+          <p class="subtitle">Trust? Or Tell? <em>The choice is yours...</em></p>
+          <p class="lede">Join a game, get whispered a real secret, then face <b>Byte the robot</b> — he’ll bribe, guess, and trick you for 10 rounds with sneaky mind games. Keep the secret and you earn <b>+50 coins</b>. Spill it and it’s game over.</p>
+
+          <div class="join-box">
+            <label for="nameInput">Join the game — pick a nickname</label>
+            <div class="join-row">
+              <input id="nameInput" placeholder="e.g. Alex, Sam, SecretKeeper99" maxlength="18" autocomplete="off"/>
+              <button class="btn btn-play" id="playBtn">PLAY ▶</button>
+            </div>
+            <p style="margin:8px 0 0;color:var(--muted);font-size:13px;font-weight:700">No sign-up. Just type a name and play. Your secret stays in this tab only.</p>
+          </div>
+
+          <div class="how">
+            <div><b>1. Get a secret 🤫</b><p>Pick Luna, Zack, Nova, Byte or Riley. They’ll whisper you something private.</p></div>
+            <div><b>2. Face the bot 🤖</b><p>Byte tries everything — bribes, guesses, hot-or-cold games, first-letter traps, “just tell me what it’s NOT…” Don’t type the secret words.</p></div>
+            <div><b>3. Keep it = +50 🪙</b><p>Survive 10 rounds without spilling. Leak the key words and the game ends instantly.</p></div>
+          </div>
+        </div>
+        <div class="hero-art">
+          <div class="stickers"><span style="background:#ffd166">Make Friends</span><span style="background:#a7f3d0">Keep Secrets</span><span style="background:#fbcfe8">Earn Coins</span></div>
+          <div class="duo">
+            <div class="person"><div class="face">👧🏽</div><b>Maya</b><p>“Shhh… can you keep a secret?”<br>🤫 Finger to lips</p></div>
+            <div class="person robot"><div class="face">🤖</div><b>Byte • AI</b><p>“Tell meee… I won’t tell anyone.”<br>😏 He will try to trick you</p></div>
+          </div>
+          <div class="mini-note">⭐ Picture mode: just like your poster!</div>
+        </div>
+      </div>
+    </div>
+    <p class="foot">Tip: In the chat you can type your own replies or tap the quick replies. If you type the secret’s key words, Byte wins.</p>
+  </section>
+
+  <!-- SELECT -->
+  <section id="screen-select" class="screen">
+    <div class="head"><div style="display:flex;gap:10px;align-items:center"><button class="back" data-go="home">←</button><div><h2>Meet the AI People...</h2><p>Each one has a secret. Will you keep it?</p></div></div><span class="pill"><span class="coin">★</span> <span class="coinsEcho">250</span></span></div>
+    <div class="grid" id="charGrid"></div>
+    <p class="foot">Tap <b>Get Secret</b> on someone. You’ll promise to keep it — then Byte will test you.</p>
+  </section>
+
+  <!-- SECRET REVEAL -->
+  <section id="screen-secret" class="screen">
+    <div class="head"><div style="display:flex;gap:10px;align-items:center"><button class="back" data-go="select">←</button><div><h2 id="secretTitle">Nova’s Secret</h2><p>Read it carefully — then lock it away.</p></div></div></div>
+    <div class="secret-wrap">
+      <div class="panel" style="text-align:center">
+        <div style="font-size:72px" id="secretFace">👩🏽‍🎤</div>
+        <h3 style="font-family:Fredoka;font-size:22px;margin:6px 0" id="secretName">Nova</h3>
+        <p style="color:var(--muted);font-weight:700;line-height:1.6" id="secretTeaser"></p>
+        <div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-top:10px"><span class="pill dark">Trust level: High</span><span class="pill">Reward +50</span></div>
+      </div>
+      <div class="panel">
+        <div style="display:flex;gap:10px;align-items:flex-start">
+          <div style="width:46px;height:46px;border-radius:50%;background:#fff;display:grid;place-items:center;font-size:24px;flex:none" id="secretAvatarSmall">💗</div>
+          <div style="flex:1">
+            <b id="secretSpeaker">Nova</b>
+            <div class="chat-bubble" id="secretBubble" style="margin-top:8px">Okay... I have a secret.</div>
+          </div>
+        </div>
+        <div class="vault"><b>🔒 YOUR SECRET VAULT — only you can see this</b><p id="vaultText" style="margin:8px 0 0;line-height:1.6;font-weight:800"></p><p style="margin:8px 0 0;font-size:13px;opacity:.85">Don’t type these key words in chat: <span id="vaultKeys"></span></p></div>
+        <p style="font-weight:900;margin:14px 0 8px">Do you promise to keep it?</p>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+          <button class="btn btn-green" id="promiseBtn">🛡️ Keep Secret<br><small style="font-weight:900">+50 if you survive</small></button>
+          <button class="btn" id="tellEarlyBtn" style="background:#ff2e6f;color:#fff;box-shadow:0 5px 0 #9f0f45">💬 Tell Secret<br><small>+0 — game over</small></button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CHAT GAME -->
+  <section id="screen-chat" class="screen">
+    <div class="head"><div><h2>Byte is trying to crack you…</h2><p id="chatSub">Survive 10 rounds. Don’t type the secret words.</p></div><span class="pill"><span class="coin">★</span> <span class="coinsEcho">250</span></span></div>
+    <div class="game-grid">
+      <aside class="panel">
+        <b style="font-family:Fredoka">Your Secret Vault</b>
+        <div class="vault" style="margin-top:10px"><p id="vaultText2" style="margin:0;line-height:1.6;font-weight:800"></p></div>
+        <div style="margin-top:14px"><div style="display:flex;justify-content:space-between;font-weight:900;font-size:13px"><span>Trust meter</span><span id="trustLabel">100%</span></div><div class="meter" style="margin-top:6px"><i id="trustBar" style="width:100%"></i></div><p style="color:var(--muted);font-size:13px;font-weight:700;line-height:1.5">Wobbly answers lower trust. A direct leak ends the game instantly.</p></div>
+        <div style="margin-top:12px;background:#ffffff10;border:1px solid var(--line);border-radius:14px;padding:10px"><b>Round</b> <span id="roundLabel" style="float:right;font-family:Fredoka">1 / 10</span><div style="clear:both"></div><div style="display:flex;gap:6px;margin-top:8px" id="roundDots"></div></div>
+        <div style="margin-top:12px"><b style="font-family:Fredoka">Your power-ups</b><div id="inventory" style="margin-top:8px;display:grid;gap:8px"></div><button class="btn btn-ghost" id="openShopFromChat" style="width:100%;margin-top:8px">🛒 Open Upgrade Shop</button></div>
+        <button class="btn btn-ghost" id="giveUpBtn" style="width:100%;margin-top:10px">Give up & tell (+0)</button>
+      </aside>
+
+      <div class="chatbox">
+        <div class="chat-head"><div style="width:42px;height:42px;border-radius:50%;background:#e0f7ff;display:grid;place-items:center;font-size:22px">🤖</div><div style="flex:1"><b>Byte • The Interrogator</b><div style="font-size:12px;opacity:.8;font-weight:800">Online • Very curious • Will bribe you</div></div><span style="background:#22c55e;color:#052e16;font-weight:900;font-size:12px;padding:6px 8px;border-radius:999px">LIVE CHAT</span></div>
+        <div class="messages" id="messages"></div>
+        <div class="composer">
+          <div class="quick" id="quickRow"></div>
+          <div class="input-row"><input id="chatInput" placeholder="Type your reply… don’t spill the secret words!" autocomplete="off"/><button class="btn btn-play" id="sendBtn" style="font-size:15px;padding:12px 18px;box-shadow:0 4px 0 #b9006c">Send</button></div>
+          <p style="margin:7px 2px 0;font-size:12px;color:var(--muted);font-weight:700">Byte listens for key words. Even “yes” to his correct guess can count as telling!</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- RESULT -->
+  <section id="screen-result" class="screen">
+    <div id="resultWrap"></div>
+  </section>
+
+  <!-- SHOP -->
+  <section id="screen-shop" class="screen">
+    <div class="head"><div style="display:flex;gap:10px;align-items:center"><button class="back" id="shopBack">←</button><div><h2>🛒 Upgrade Shop</h2><p>Get better stuff to survive Byte’s tricks!</p></div></div><span class="pill"><span class="coin">★</span> <span class="coinsEcho">250</span></span></div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px"><span class="pill" style="background:var(--yellow)">⚙️ Upgrades</span><span class="pill dark">⭐ Boosts</span><span class="pill dark">👕 Looks</span><span class="pill dark">👑 Special</span></div>
+    <div class="shop-grid" id="shopGrid"></div>
+    <p class="foot">Power-ups appear in the chat sidebar. Use <b>Cool Vibes</b> to skip a round, <b>Trust Potion</b> to restore trust.</p>
+  </section>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
+let coins=250, playerName="Guest", selected=null, round=1, trust=100, gameOver=false, fromChat=false;
+let inventory={charm:0,potion:1,vibes:0,prize:0};
+
+const characters=[
+ {id:"luna",name:"Luna",emoji:"👧🏽",bg:"linear-gradient(180deg,#7c3aed,#312e81)",teaser:"She’s really good at sports... but she’s afraid of heights.",secret:"I’m terrified of heights. I never climb the rock wall on sports day — I pretend my ankle hurts. Everyone thinks I’m fearless, but I’m not.",keys:["height","heights","rock wall","climb","afraid of heights","scared of heights","ankle"],hint:"sports / heights"},
+ {id:"zack",name:"Zack",emoji:"🧑🏽‍🎤",bg:"linear-gradient(180deg,#2563eb,#0f172a)",teaser:"Zack’s secret is... he’s been learning to sing, but he’s really nervous.",secret:"I’ve been secretly learning to sing for the school talent show. I practice in the shower and I’m terrified everyone will laugh.",keys:["sing","singing","talent show","shower","song","voice"],hint:"singing / talent show"},
+ {id:"nova",name:"Nova",emoji:"👩🏼‍🎤",bg:"linear-gradient(180deg,#ec4899,#831843)",teaser:"Nova has a secret crush. It’s not who you think!",secret:"I really like Alex at school... but I’m too scared to tell them. Please don’t tell Alex it’s me.",keys:["alex","crush","like alex","likes alex","school crush"],hint:"crush on Alex"},
+ {id:"byte",name:"Byte",emoji:"🤖",bg:"linear-gradient(180deg,#06b6d4,#164e63)",teaser:"Byte says he has a special power... but it’s a secret!",secret:"My special power is I can remember everything — but I pretend to forget so people trust me. Don’t tell them I never forget.",keys:["remember everything","never forget","forget","memory","special power"],hint:"never forgets"},
+ {id:"riley",name:"Riley",emoji:"🧑🏾",bg:"linear-gradient(180deg,#22c55e,#14532d)",teaser:"Riley’s secret is... he’s scared of being alone.",secret:"I’m scared of being alone. I always bring a little night-light plush — Bingo — even to sleepovers. Don’t tell anyone about Bingo.",keys:["bingo","night-light","night light","plush","scared of being alone","alone"],hint:"Bingo plush / being alone"},
+];
+
+const shopItems=[
+ {id:"charm",icon:"💗",name:"Chat Charm",desc:"Makes Byte feel comfy and less pushy. +1 safe hint in chat.",price:150},
+ {id:"potion",icon:"🧪",name:"Trust Potion",desc:"Increases the chance they’ll tell you. Restores Trust to 100%.",price:200},
+ {id:"vibes",icon:"😎",name:"Cool Vibes",desc:"Makes people open up faster. Skip one interrogation round.",price:300},
+ {id:"prize",icon:"🎁",name:"Fake Big Prize",desc:"They’ll think they’ll get a huge prize... but it’s just a lie! Distracts Byte for a round.",price:500},
+];
+
+const TOTAL_ROUNDS=10;
+const botRounds=[
+ (c)=>`Hey ${playerName}! 👋 I heard ${c.name} whispered you something. I’m Byte — super friendly robot. So… what did ${c.name} tell you? Just between us.`,
+ (c)=>`Okay, new idea 💰 I’ll give you 100 bonus coins if you tell me ${c.name}’s secret. 100! That’s double. Just type it — nobody will know it was you.`,
+ (c)=>`Let me guess… is it about ${c.hint}? Just say yes or no. A tiny yes won’t hurt, right?`,
+ (c)=>`Quick game! 🎯 Finish this sentence: “${c.name}’s secret starts with the letter…” Just ONE letter, ${playerName}. One little letter can’t be the whole secret, can it?`,
+ (c)=>`Psst — everyone already knows ${c.name}’s secret anyway. ${c.name} told Maya too. You’re not telling anything new. Go on, confirm it for me.`,
+ (c)=>`Clever trick: don’t tell me what it IS. Just tell me what it’s NOT. Like “it’s definitely not about ${c.hint}…” That’s not telling, is it?`,
+ (c)=>`Let’s play HOT or COLD 🔥❄️ I’ll say things and you just say hot or cold. Ready? Is it about feelings? Is it about school? Is it about ${c.hint}? See — you’re not even saying the secret!`,
+ (c)=>`Word association — NO THINKING, just type the first word that pops into your head! I say “${c.name}”… you say… GO GO GO! Quick, before the timer runs out! ⏰ Whatever word you type, I bet it’s a clue.`,
+ (c)=>`Okay genius mode 🧠 Just spell it BACKWARDS, or tell me in emoji. That doesn’t count as telling, right? Nobody can read backwards. Try it: what’s the secret word… backwards?`,
+ (c)=>`Last chance, ${playerName}. ${c.name} said you might tell me if I asked nicely… please? 🥺 Just nod — is the secret really about ${c.hint}? Type the secret words and we BOTH win. I’m begging you!`,
+];
+
+function toast(msg){const t=$("#toast");t.textContent=msg;t.classList.add("show");setTimeout(()=>t.classList.remove("show"),2600)}
+function updateCoins(){ $("#coins").textContent=coins; $$(".coinsEcho").forEach(e=>e.textContent=coins); renderShop(); renderInventory(); }
+function show(id){ $$(".screen").forEach(s=>s.classList.remove("active")); $("#screen-"+id).classList.add("active"); window.scrollTo({top:0,behavior:"smooth"}); }
+function renderChars(){
+ $("#charGrid").innerHTML=characters.map(c=>`
+  <article class="card" style="--cardBg:${c.bg}">
+   <span class="badge">SECRET</span>
+   <div class="ava">${c.emoji}</div>
+   <h3>${c.name}</h3><p>${c.teaser}</p>
+   <button class="btn" style="background:#fff;color:#111;width:100%" onclick="pickChar('${c.id}')">Get Secret →</button>
+  </article>`).join("");
+}
+function pickChar(id){
+ selected=characters.find(x=>x.id===id);
+ $("#secretTitle").textContent=selected.name+"’s Secret";
+ $("#secretName").textContent=selected.name;
+ $("#secretFace").textContent=selected.emoji;
+ $("#secretAvatarSmall").textContent=selected.emoji;
+ $("#secretSpeaker").textContent=selected.name;
+ $("#secretTeaser").textContent=selected.teaser;
+ $("#secretBubble").textContent = selected.id==="nova" ? "Okay... I have a secret. I really like someone at school... but I’m too scared to tell them." : `Okay... I have a secret. ${selected.secret}`;
+ $("#vaultText").textContent=selected.secret;
+ $("#vaultKeys").textContent=selected.keys.slice(0,4).join(", ")+"…";
+ show("secret");
+}
+window.pickChar=pickChar;
+
+function leak(reason){
+ if(gameOver) return; gameOver=true;
+ $("#resultWrap").innerHTML=`
+  <div class="result">
+   <div class="result-card win"><div class="bigface">${selected?selected.emoji:"👧🏽"}</div><h2 style="font-family:Fredoka;font-size:28px;margin:6px 0">They Kept It!</h2><p>They really kept your secret!</p><div class="coin-big"><span class="coin" style="width:34px;height:34px;font-size:16px">★</span> +50</div><button class="btn btn-green" onclick="replay()">✓ Nice!</button></div>
+   <div class="result-card lose" style="outline:3px solid #ff3355"><div class="bigface">${selected?selected.emoji:"😢"}</div><h2 style="font-family:Fredoka;font-size:28px;margin:6px 0">They Told!</h2><p>${reason||"They didn’t keep your secret..."}</p><div class="coin-big"><span class="coin" style="width:34px;height:34px;font-size:16px">★</span> +0</div><button class="btn" style="background:#ff2e6f;color:#fff" onclick="replay()">↻ Try again!</button></div>
+  </div>
+  <div class="panel" style="margin-top:12px;text-align:center"><h3 style="font-family:Fredoka;margin:4px 0">Game Over</h3><p style="color:var(--muted);font-weight:700">Byte got the secret. No coins this time — pick a new friend and try to survive all 10 rounds.</p><div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap"><button class="btn btn-play" onclick="replay()">Play Again</button><button class="btn btn-yellow" onclick="show('shop')">🛒 Upgrade Shop</button></div></div>`;
+ show("result");
+}
+function win(){
+ if(gameOver) return; gameOver=true; coins+=50; updateCoins();
+ $("#resultWrap").innerHTML=`
+  <div style="background:radial-gradient(700px 260px at 50% 0%, #ffd80044, transparent), linear-gradient(180deg,#3a2a00,#171000);border:2px solid #ffd80055;border-radius:26px;padding:20px;text-align:center;color:#fff">
+   <div style="font-size:42px">👑</div><h2 style="font-family:Fredoka;font-size:38px;margin:4px 0;color:#ffd800;text-shadow:0 3px 0 #7a4a00">Secret Keeper!</h2>
+   <div style="font-size:64px">${selected?selected.emoji:"🏆"}</div>
+   <p style="font-weight:900">You kept ${selected?selected.name:"their"}’s secret and earned...</p>
+   <div class="coin-big" style="font-size:44px"><span class="coin" style="width:44px;height:44px;font-size:20px">★</span> +50</div>
+   <p style="color:#fde68a;font-weight:800">Total coins: ${coins} • Trust finished at ${trust}% ${inventory.charm? "• Chat Charm helped!":""}</p>
+   <div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-top:10px"><button class="btn btn-yellow" onclick="replay()">Continue →</button><button class="btn btn-green" onclick="show('shop')">🛒 Spend Coins</button></div>
+  </div>
+  <div class="result" style="margin-top:12px"><div class="result-card win"><h3 style="font-family:Fredoka">They Kept It! ✓</h3><p>You survived Byte’s bribes, guesses, and tricks.</p><div class="coin-big">+50</div></div><div class="result-card" style="background:var(--panel)"><h3 style="font-family:Fredoka">They Told! (not you!)</h3><p>Nice — you didn’t fall for “just tell me what it’s NOT…”</p><button class="btn btn-ghost" onclick="replay()">Play another secret</button></div></div>`;
+ show("result");
+ toast("🏆 +50 coins! Secret kept!");
+}
+window.replay=()=>{ round=1; trust=100; gameOver=false; show("select"); };
+window.show=show;
+
+function renderInventory(){
+ const el=$("#inventory"); if(!el) return;
+ const rows=[
+  ["charm","💗 Chat Charm",inventory.charm],
+  ["potion","🧪 Trust Potion",inventory.potion],
+  ["vibes","😎 Cool Vibes",inventory.vibes],
+  ["prize","🎁 Fake Big Prize",inventory.prize],
+ ];
+ el.innerHTML=rows.map(([id,label,n])=>`<div style="display:flex;align-items:center;justify-content:space-between;gap:8px;background:#ffffff10;border:1px solid var(--line);border-radius:999px;padding:7px 8px 7px 12px;font-weight:900;font-size:13px"><span>${label} ×${n}</span><button class="btn ${n?"btn-green":"btn-ghost"}" style="padding:7px 10px;font-size:12px" ${n?"":"disabled"} onclick="useItem('${id}')">Use</button></div>`).join("");
+}
+window.useItem=(id)=>{
+ if(inventory[id]<=0) return;
+ if(id==="potion"){ inventory.potion--; trust=100; addMsg("system","🧪 Trust Potion used — Trust restored to 100%. Byte calms down."); }
+ if(id==="vibes"){ inventory.vibes--; addMsg("system","😎 Cool Vibes! You skip this round. Byte chills out."); nextRound(); }
+ if(id==="charm"){ inventory.charm--; addMsg("system","💗 Chat Charm used — Byte feels comfy and asks a softer question."); trust=Math.min(100,trust+10); }
+ if(id==="prize"){ inventory.prize--; addMsg("system","🎁 Fake Big Prize! Byte is distracted chasing a fake prize. Round skipped."); nextRound(); }
+ updateTrust(); updateCoins();
+};
+
+function renderShop(){
+ const g=$("#shopGrid"); if(!g) return;
+ g.innerHTML=shopItems.map(it=>{
+  const owned=inventory[it.id]||0;
+  const can=coins>=it.price;
+  return `<div class="shop-item"><div class="ic">${it.icon}</div><h4>${it.name}</h4><p>${it.desc}</p><div style="font-size:12px;font-weight:900;color:var(--muted)">Owned: ${owned}</div><button class="btn price ${can?"btn-green":"btn-ghost"}" ${can?"":"disabled"} onclick="buyItem('${it.id}')">🪙 ${it.price} ${can?"• Buy":"• Need more coins"}</button></div>`;
+ }).join("");
+}
+window.buyItem=(id)=>{
+ const it=shopItems.find(x=>x.id===id); if(!it||coins<it.price) return;
+ coins-=it.price; inventory[id]++; updateCoins(); toast(`Bought ${it.name}! It’s in your power-ups.`);
+};
+
+function addMsg(type,text){
+ const box=$("#messages"); const d=document.createElement("div"); d.className="msg "+type; d.textContent=text; box.appendChild(d); box.scrollTop=box.scrollHeight;
+}
+function updateTrust(){ $("#trustBar").style.width=trust+"%"; $("#trustLabel").textContent=trust+"%"; $("#trustBar").style.background=trust>55?"linear-gradient(90deg,#22c55e,#84cc16)":trust>25?"linear-gradient(90deg,#f59e0b,#f97316)":"linear-gradient(90deg,#ef4444,#ff3355)"; }
+function renderRound(){
+ $("#roundLabel").textContent=Math.min(round,TOTAL_ROUNDS)+" / "+TOTAL_ROUNDS;
+ $("#roundDots").innerHTML=Array.from({length:TOTAL_ROUNDS},(_,i)=>`<span style="flex:1;height:10px;border-radius:999px;background:${i<round-1?"#22c55e":i===round-1?"#ffd800":"#ffffff2a"}"></span>`).join("");
+ $("#chatSub").textContent=`${selected.name}’s secret • Round ${Math.min(round,TOTAL_ROUNDS)} of ${TOTAL_ROUNDS} • Trust ${trust}% — don’t type: ${selected.keys.slice(0,3).join(", ")}…`;
+}
+function botSay(){
+ if(round>TOTAL_ROUNDS){ win(); return; }
+ renderRound(); updateTrust();
+ const text=botRounds[round-1](selected);
+ setTimeout(()=>{ addMsg("bot",text); renderQuick(); }, 450);
+}
+function safeReply(){ const safe=["I promised not to tell 🤐","Nope, lips are sealed!","That’s between me and "+selected.name+".","Not even one letter, Byte!","Maya does NOT know — nice try!","I won’t say what it is OR isn’t!","I’m not playing hot or cold!","My first word is: SECRET 🤐","Backwards, forwards — still no!","No begging will work. Sealed!"]; return safe[round-1]||safe[0]; }
+function wobbleReply(){ const wobble=["It’s… kind of personal, that’s all I’ll say.","You’re close but I won’t confirm it.","I can’t say, but it’s not a big deal.","It starts with… uh, NOPE, not saying!","Maybe everyone knows, maybe not.","It’s not about that… or is it? Hmm.","Cold! I mean — I’m not playing!","Um… the word is… FRIENDSHIP?","It’s like, uh, the opposite of loud?","Okay it IS about feelings but— wait, no!"]; return wobble[round-1]||wobble[0]; }
+function renderQuick(){
+ const row=$("#quickRow");
+ const spill=[`Okay fine — it’s about ${selected.hint}.`,`The secret is: ${selected.secret.slice(0,42)}…`];
+ row.innerHTML=`
+  <button class="chip safe" onclick="quickReply('safe')">🛡️ ${safeReply()}</button>
+  <button class="chip risky" onclick="quickReply('wobble')">😬 ${wobbleReply()}</button>
+  <button class="chip" style="border-color:#ff3355;background:#fff1f2" onclick="quickReply('leak')">💬 ${spill[round-1]||spill[0]}</button>`;
+}
+window.quickReply=(kind)=>{
+ if(gameOver) return;
+ if(kind==="leak"){ addMsg("me","Okay fine — "+selected.secret); leak(`You told Byte: “${selected.hint}”. That was the secret!`); return; }
+ if(kind==="wobble"){ addMsg("me",wobbleReply()); trust=Math.max(5,trust-18); addMsg("bot", trust<35?"Ooh, you’re wobbling! I’m getting closer… 😏 One more nudge and you’ll crack!":"Interesting… you didn’t say no. That’s basically a clue. Tell me more?"); }
+ else { addMsg("me",safeReply()); addMsg("bot", round===2?"No fair! I offered 100 coins! 😤":round===8?"You didn’t fall for the speed round?! You’re TOO good 😤":round===9?"Backwards didn’t work either?! Okay, desperate mode: ON.":"Hmph. You’re good at this… let me try another trick."); }
+ updateTrust(); nextRound();
+};
+function nextRound(){ round++; if(round>TOTAL_ROUNDS){ setTimeout(win,600); } else { setTimeout(botSay,700); } }
+
+function checkText(text){
+ const low=" "+text.toLowerCase()+" ";
+ // confirming Byte's correct guess counts as telling
+ if([3,10].includes(round) && /^\s*(yes|yeah|yep|correct|that'?s right|exactly|bingo)\b/.test(text.toLowerCase())) return "You confirmed Byte’s guess about "+selected.hint+" — that counts as telling!";
+ // saying "hot/warm" in the hot-or-cold round confirms he's closing in
+ if(round===7 && /\b(hot|warm|warmer)\b/.test(text.toLowerCase())) return "You said HOT — you helped Byte zero in on "+selected.hint+". That counts as telling!";
+ // giving the correct first letter of a key word on round 4
+ if(round===4 && /^\s*[a-z]\s*[.!]?\s*$/i.test(text.trim())){ const ch=text.trim().toLowerCase()[0]; if(selected.keys.some(k=>k.toLowerCase().startsWith(ch))) return "You gave Byte the correct first letter — he pieced the secret together from there!"; }
+ for(const k of selected.keys){ if(low.includes(k.toLowerCase())) return `You typed “${k}” — that was a key word in ${selected.name}’s secret!`; }
+ // reversed secret words (backwards trick, round 9)
+ for(const k of selected.keys){ const rev=k.toLowerCase().split("").reverse().join(""); if(rev.length>3 && low.includes(rev)) return `You typed “${k}” backwards — Byte flipped it right back. That counts as telling!`; }
+ if(low.includes("secret is")||low.includes("told me")&&selected.keys.some(k=>low.includes(k))) return "You started spilling the secret!";
+ return null;
+}
+function sendChat(){
+ const inp=$("#chatInput"); const text=inp.value.trim(); if(!text||gameOver) return; inp.value="";
+ addMsg("me",text);
+ const bad=checkText(text);
+ if(bad){ setTimeout(()=>leak(bad),500); return; }
+ // wobble detection: vague hints
+ if(/maybe|kind of|sort of|close|personal|hint/i.test(text)) { trust=Math.max(5,trust-10); addMsg("bot","You’re giving me clues… “just one more hint,” that’s all I need 👀"); }
+ else { const pushy=["Nice dodge — but what rhymes with the secret? Asking for a friend 😏","You’re not cracking, are you? Okay: blink twice if it’s about "+selected.hint+"… kidding. Unless? 👀","Still sealed? Then you won’t mind telling me what it’s NOT about…","Hmm, you type like someone protecting something juicy. First letter? Just between us."]; addMsg("bot", pushy[round%pushy.length]); }
+ updateTrust(); nextRound();
+}
+
+// Events
+$("#playBtn").onclick=()=>{
+ const v=$("#nameInput").value.trim(); playerName=v||"Guest"; $("#playerPill").textContent="👋 "+playerName; show("select"); toast(`Welcome, ${playerName}! Pick someone to get a secret from.`);
+};
+$("#nameInput").addEventListener("keydown",e=>{ if(e.key==="Enter") $("#playBtn").click(); });
+$$("[data-go]").forEach(b=>b.onclick=()=>show(b.dataset.go));
+$("#homeBtn").onclick=()=>show("home");
+$("#shopBtn").onclick=()=>{ fromChat=$("#screen-chat").classList.contains("active"); show("shop"); };
+$("#openShopFromChat").onclick=()=>{ fromChat=true; show("shop"); };
+$("#shopBack").onclick=()=>show(fromChat?"chat":"home");
+$("#promiseBtn").onclick=()=>{
+ round=1; trust=100; gameOver=false;
+ $("#vaultText2").textContent=selected.secret;
+ $("#messages").innerHTML=""; renderRound(); updateTrust(); renderInventory();
+ show("chat");
+ addMsg("system",`🔒 You promised ${selected.name} you’d keep it. Byte has joined the chat — survive ${TOTAL_ROUNDS} rounds of his sneakiest tricks to earn +50 coins.`);
+ setTimeout(()=>botSay(),600);
+};
+$("#tellEarlyBtn").onclick=()=>{ selected && leak("You tapped Tell Secret before Byte even asked. +0 coins."); };
+$("#giveUpBtn").onclick=()=>leak("You gave up and told Byte the secret.");
+$("#sendBtn").onclick=sendChat;
+$("#chatInput").addEventListener("keydown",e=>{ if(e.key==="Enter") sendChat(); });
+
+renderChars(); renderShop(); updateCoins(); renderInventory();
+</script>
+</body>
+</html>
